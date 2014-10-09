@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fc="http://ns.adobe.com/flashcatalyst/2009"
+		xmlns:flm="http://ns.adobe.com/flame/2008"
+		xmlns:d="http://ns.adobe.com/fxg/2008/dt"
+		width="70" height="22"
+		height.up="60">
+	
+	<fx:Metadata>
+		[HostComponent("spark.components.Button")]
+	</fx:Metadata>
+	
+	<s:states>
+		<s:State name="up" />
+		<s:State name="over" />
+		<s:State name="down" />
+		<s:State name="disabled" />
+	</s:states>
+	<s:Rect includeIn="down" left="0.001" right="-0.001" top="0.001" bottom="-0.001" radiusX="0">
+		<s:stroke>
+			<s:SolidColorStroke color="0x1C1C1B" weight="1"/>
+		</s:stroke>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#1E1F1F" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="0x1D1D1D" ratio="0.9058823529411765"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	<!-- background -->
+	<s:Rect includeIn="disabled,up" radiusX="0"
+			left.disabled="0" right.disabled="0" top.disabled="0" bottom.disabled="0"
+			alpha.disabled="0.5"
+			left.up="0.001" right.up="-0.001" top.up="0.001" bottom.up="-0.001">
+		<s:stroke>
+			<s:SolidColorStroke color="#333333"
+								color.up="0x1C1C1B" weight.up="1"/>
+		</s:stroke>
+		<s:fill>
+			<s:SolidColor color="#BABABA"/>
+		</s:fill>
+		<s:fill.up>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="0x353535" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="0x1D1D1D" ratio="0.9058823529411765"/>
+			</s:LinearGradient>
+		</s:fill.up>
+	</s:Rect>
+	
+	<!-- shadow (down state only) -->
+	<s:Rect includeIn="down" left="0" right="0" y="0" height="4" radiusX="2">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="0.23" color="#000000" ratio="0"/>
+				<s:GradientEntry alpha="0.20" color="#000000" ratio="0.4"/>
+				<s:GradientEntry alpha="0.055" color="#000000" ratio="0.55"/>
+				<s:GradientEntry alpha="0.0" color="#000000" ratio="0.8"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	<s:Rect includeIn="down" x="0" top="0" width="4" height="22" radiusX="2">
+		<s:fill>
+			<s:LinearGradient rotation="0">
+				<s:GradientEntry alpha="0.13" color="#000000" ratio="0"/>
+				<s:GradientEntry alpha="0.12" color="#000000" ratio="0.2"/>
+				<s:GradientEntry alpha="0.0" color="#000000" ratio="0.5803921568627451"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	<s:Rect includeIn="over" left="0.001" right="-0.001" top="0.001" bottom="-0.001" radiusX="0">
+		<s:stroke>
+			<s:SolidColorStroke color="0x1C1C1B" weight="1"/>
+		</s:stroke>
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry alpha="1.0" color="#303030" ratio="0"/>
+				<s:GradientEntry alpha="1.0" color="0x1D1D1D" ratio="0.9058823529411765"/>
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	
+	<!-- label -->
+	<s:Label id="labelDisplay" left="0" height="22" right="0" bottom="0" textAlign="center"
+			 verticalAlign="middle"
+			 color.down="#CCCCCC" color="#FFFFFF"/>
+	<!-- label -->
+</s:Skin>

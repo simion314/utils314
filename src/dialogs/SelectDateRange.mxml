@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dialogs:ModalDialog xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" 
+					 xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:dialogs="dialogs.*" 
+					 width="194" height="132"
+					 creationComplete="modaldialog1_creationCompleteHandler(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			import spark.events.PopUpEvent;
+			private static var dlg:SelectDateRange;
+			private var _startDate:Date;
+			private var _endDate:Date;
+			private static var _handler:Function;
+			public static function getDateRange(handler:Function):void{
+				if(!dlg){
+					dlg=new SelectDateRange();
+					dlg.addEventListener(PopUpEvent.CLOSE, onClose);
+					var now:Date = new Date();
+					//go to previus month
+					now.month-=1;
+					dlg._startDate = new Date(now.fullYear, now.month, 1);
+					dlg._endDate = new Date(now.fullYear, ++now.month, 0);	
+				}
+				_handler=handler;
+				dlg.open(null,true);
+			}
+			private static function onClose(event:*):void{
+				
+				if(dlg.canceled)
+				{
+					_handler(null,null);
+					return;
+				}
+				var startDate:Date=dlg.startDate.selectedDate;
+				var endDate:Date=dlg.endDate.selectedDate;
+				//just weant to make sure that the end date day is also fully used
+				endDate.hours=23;
+				endDate.minutes=59;
+				endDate.seconds=59;
+				_handler(startDate,endDate);
+			}
+			protected function doneBtn_clickHandler(event:MouseEvent):void
+			{
+				this.canceled=false;
+				this.close();
+			}
+			
+			protected function closeBtn_clickHandler(event:MouseEvent):void
+			{
+				this.canceled=true;
+				this.close();
+			}
+			
+			protected function modaldialog1_creationCompleteHandler(event:FlexEvent):void
+			{
+				this.startDate.selectedDate = _startDate;
+				this.endDate.selectedDate = _endDate;
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<s:Panel width="100%" height="100%" title="Select a date range">
+	
+	<s:layout>
+		<s:VerticalLayout paddingBottom="6" paddingRight="6" paddingTop="6" paddingLeft="6"/>
+	</s:layout>
+	
+	<s:HGroup width="100%" verticalAlign="middle">
+		<s:Label text="Start Date" width="80"/>
+		<mx:DateField id="startDate"/>
+	</s:HGroup>
+	<s:HGroup width="100%" verticalAlign="middle">
+		<s:Label text="End Date"   width="80"/>
+		<mx:DateField id="endDate" />
+	</s:HGroup>
+	<s:HGroup width="100%" verticalAlign="middle">
+		<s:Spacer width="100%"/>
+		
+		<s:Button id="closeBtn" label="Close" click="closeBtn_clickHandler(event)"/>
+		<s:Button id="doneBtn" label="Apply" click="doneBtn_clickHandler(event)"/>
+	</s:HGroup>
+		
+	</s:Panel>
+</dialogs:ModalDialog>

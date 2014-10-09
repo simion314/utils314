@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dialogs:ModalDialog xmlns:fx="http://ns.adobe.com/mxml/2009"
+					 xmlns:s="library://ns.adobe.com/flex/spark"
+					 xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:dialogs="dialogs.*"
+					 creationComplete="modaldialog1_creationCompleteHandler(event)"
+					 maxWidth="600" minWidth="200"
+					 keyDown="onKeyDown(event)" >
+	<dialogs:layout>
+		<s:BasicLayout/>
+	</dialogs:layout>
+	<dialogs:states>
+		<s:State name="State1"/>
+		<s:State name="state2buttons"/>
+	</dialogs:states>
+	<fx:Declarations>
+		<fx:String id="_title"/>
+		<fx:String id="_text"/>
+		<fx:String id="_details"/>
+		<fx:String id="_yesLabel"/>
+		<fx:String id="_noLabel"/>
+		<fx:Boolean id="accepted"/>
+		<fx:Function id="closeCallback"/>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+		
+			
+			import mx.events.FlexEvent;
+			
+			import spark.events.PopUpEvent;
+			
+			public static function inform(parent:DisplayObjectContainer, title:String, text:String, moreDetails:String = null, callback:Function = null, YesNoMode:Boolean = false, yesLabel:String = null, noLabel:String = null):void {
+				//alertcomponent.Alert.show(text, title, null,parent,callback);
+				var dlg:MessageBox = new MessageBox();
+				if (YesNoMode)
+					dlg.currentState = "state2buttons";
+				dlg.title = title;
+				dlg.text = text;
+				dlg._yesLabel = yesLabel;
+				dlg._noLabel = noLabel;
+				dlg.closeCallback = callback;
+				if (dlg.closeCallback != null)
+					dlg.addEventListener(PopUpEvent.CLOSE, dlg.closeCallback);
+				
+				dlg.open(parent, true);
+			}
+			
+			public function set title(s:String):void {
+				if (s != null)
+					this._title = s;
+				else
+					this._title = "Information";
+			}
+			
+			public function onKeyDown(event:KeyboardEvent):void {
+				switch(event.keyCode){
+				case Keyboard.ENTER: {
+					this.accepted = true;
+					this.close();
+					break;
+				}
+				case Keyboard.ESCAPE: {
+					this.accepted = false;
+					this.close();
+					break;
+				}
+				}
+			}
+			
+			public function set text(s:String):void {
+				if (s != null)
+					this._text = s;
+				else
+					this._text = "";
+			}
+			
+			protected function okButton_clickHandler(event:MouseEvent):void {
+				accepted = true;
+				this.close();
+			}
+			
+			protected function modaldialog1_creationCompleteHandler(event:FlexEvent):void {
+				this.textComponent.maxWidth = this.width - 12;
+				if (_yesLabel)
+					this.okButton.label = _yesLabel;
+				if (_noLabel)
+				{
+					this.cancelButton.label = _noLabel;
+					if(_noLabel.length>8)
+						this.cancelButton.width=90;
+					if(_noLabel.length>14)
+					{
+						this.cancelButton.width=180;
+						this.theSpacer.width=0;
+						this.theSpacer.visible=false;
+					}
+					if(_yesLabel.length>8)
+						this.okButton.width=90;
+					if(_yesLabel.length>14)
+					{
+						this.okButton.width=180;
+						this.theSpacer.width=0;
+						this.theSpacer.visible=false;
+					}
+				}
+				
+				callLater(focusButton);
+				okButton.setFocus();
+			}
+			
+			public function focusButton():void {
+				callLater(function ():void {
+					focusManager.setFocus(okButton);
+				});
+			}
+			
+			protected function cancelButton_clickHandler(event:MouseEvent):void {
+				accepted = false;
+				this.close();
+			}
+			
+		
+		]]>
+	</fx:Script>
+	
+	<s:Panel id="mainpanel" left="0" right="0" top="0" bottom="0" title="{_title}">
+		<s:layout>
+			<s:VerticalLayout paddingBottom="9" paddingLeft="6" paddingRight="6" paddingTop="6"/>
+		</s:layout>
+		<mx:Text id="textComponent" left="0" right="0" text="{_text}"
+				 width="100%" height="100%" top="0" bottom="0"/>
+		
+		<s:HGroup  width="100%">
+			<s:Spacer width="50%"/>
+			<s:Button id="okButton" label="OK" click="okButton_clickHandler(event)"
+					  label.state2buttons="Yes"/>
+			<s:Spacer id="theSpacer" includeIn="state2buttons" width="25" height="10"/>
+			<s:Button id="cancelButton" includeIn="state2buttons" label="No" click="cancelButton_clickHandler(event)"/>
+			
+			<s:Spacer  width="50%"/>
+		</s:HGroup>
+	</s:Panel>
+	
+</dialogs:ModalDialog>

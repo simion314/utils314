@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
+  <includeClasses>
+    <classEntry path="dialogs.floatingpanel.FloatingPanel314"/>
+    <classEntry path="core.EmailUtils"/>
+    <classEntry path="generic_components.GridHeaderData"/>
+    <classEntry path="generic_components.AdvancedDataGridCustom"/>
+    <classEntry path="generic_components.NonEditableComboBox"/>
+    <classEntry path="generic_components.NumericTextInput"/>
+    <classEntry path="mathematics.Token"/>
+    <classEntry path="mathematics.Parser"/>
+    <classEntry path="core.PreferenceStore"/>
+    <classEntry path="core.UI_PreferencesStore"/>
+    <classEntry path="generic_components.LinkItemRenderer"/>
+    <classEntry path="generic_components.skins.LinkLabel"/>
+    <classEntry path="generic_components.IPersistentComponent"/>
+    <classEntry path="generic_components.RemoveItemRenderer"/>
+    <classEntry path="generic_components.events.RemoveItemEvent"/>
+    <classEntry path="generic_components.VDivideBoxPersistant"/>
+    <classEntry path="generic_components.HDividerPersistent"/>
+    <classEntry path="generic_components.ListCustom"/>
+    <classEntry path="generic_components.DropDownListCustom"/>
+    <classEntry path="generic_components.FilterDataProvider"/>
+    <classEntry path="generic_components.auxcode.ScorClassAux"/>
+    <classEntry path="generic_components.LabelHighlight"/>
+    <classEntry path="generic_components.skins.LabelHighlightItemRenderer"/>
+    <classEntry path="generic_components.ListWithSearchFilter"/>
+    <classEntry path="dialogs.SelectItemsFromfilterListDialog"/>
+    <classEntry path="core.StringUtils"/>
+    <classEntry path="core.ObjectUrils"/>
+    <classEntry path="generic_components.skins.HighlightRendererAdvancedDataGrid"/>
+    <classEntry path="core.PrintAdvancedGridCustom"/>
+    <classEntry path="core.FlexPrintJobCustom"/>
+    <classEntry path="core.LinkResolver"/>
+    <classEntry path="generic_components.auxcode.MySortItemRenderer"/>
+    <classEntry path="generic_components.skins.BlackButton"/>
+    <classEntry path="generic_components.skins.ImgButton"/>
+    <classEntry path="generic_components.EmailInput"/>
+    <classEntry path="generic_components.auxcode.AdvancedFilterParams"/>
+    <classEntry path="generic_components.AdvancedFilterComponent"/>
+    <classEntry path="generic_components.PhoneNumbersComponent"/>
+    <classEntry path="core.PhoneNumber"/>
+    <classEntry path="generic_components.PhoneNumberList"/>
+    <classEntry path="generic_components.skins.PhoneNumberItemRenderer"/>
+    <classEntry path="core.Debug"/>
+    <classEntry path="dialogs.TitledModalDialog"/>
+    <classEntry path="core.PhpDate"/>
+    <classEntry path="dialogs.CustomWindow"/>
+    <classEntry path="dialogs.LoadingDialog"/>
+    <classEntry path="generic_components.helpers.ListHelpers"/>
+    <classEntry path="dialogs.SelectDateRange"/>
+    <classEntry path="core.ArrayUtils"/>
+    <classEntry path="core.TimerUtil"/>
+    <classEntry path="dialogs.ResizableTitleWindowSkin"/>
+    <classEntry path="generic_components.LinkItemRendererSDataGrid"/>
+    <classEntry path="generic_components.LinkItemRendererMxDataGrid"/>
+    <classEntry path="generic_components.MultipleselectDropDownList"/>
+    <classEntry path="generic_components.ControlledScrollVGroup"/>
+    <classEntry path="generic_components.ControlledSCrollTiledGroup"/>
+    <classEntry path="core.net.Downloader"/>
+    <classEntry path="core.net.DownloadEvent"/>
+    <classEntry path="core.FileStreamWithLineReader"/>
+  </includeClasses>
+  <includeResources/>
+  <namespaceManifests/>
+</flexLibProperties>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:List xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark" 
+		xmlns:mx="library://ns.adobe.com/flex/mx" width="400" height="300"
+		itemRenderer="generic_components.skins.PhoneNumberItemRenderer"
+		dataProvider="{_phoneNumbers}" borderVisible="false">
+	<s:layout>
+		<s:VerticalLayout useVirtualLayout="false" requestedMinRowCount="1" />
+	</s:layout>
+
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import core.PhoneNumber;
+			
+			import mx.collections.ArrayCollection;
+			[Bindable]
+			private var _phoneNumbers:ArrayCollection;
+			
+			public function get phoneNumbers():ArrayCollection
+			{
+				return _phoneNumbers;
+			}
+			
+			public function set phoneNumbers(value:ArrayCollection):void
+			{
+				_phoneNumbers = value;
+			
+			}
+		]]>
+	</fx:Script>
+</s:List>

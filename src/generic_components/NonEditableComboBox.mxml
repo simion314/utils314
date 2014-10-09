@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ComboBox xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			xmlns:s="library://ns.adobe.com/flex/spark" 
+			xmlns:mx="library://ns.adobe.com/flex/mx"
+			creationComplete="combobox1_creationCompleteHandler(event)">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			private var _editable:Boolean=false;
+			public function  set editable(value:Boolean):void{
+				_editable=value;
+				if(this.textInput.editable)
+					this.textInput.editable=_editable;
+			}
+			
+			protected function combobox1_creationCompleteHandler(event:FlexEvent):void
+			{
+				if(this.textInput.editable)
+					this.textInput.editable=_editable;
+			}
+			
+		]]>
+	</fx:Script>
+</s:ComboBox>

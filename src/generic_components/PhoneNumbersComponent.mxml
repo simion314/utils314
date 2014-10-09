@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" width="200" 
+		  height="18" 
+		  xmlns:ns="generic_components.skins.*"
+		  paddingTop="3" paddingBottom="3" paddingLeft="0" paddingRight="0">
+	<fx:Declarations>
+	
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import core.PhoneNumber;
+			
+			import flash.desktop.Clipboard;
+			import flash.desktop.ClipboardFormats;
+			private var _phoneNumber:PhoneNumber;
+
+			public function get phoneNumber():PhoneNumber
+			{
+				return _phoneNumber;
+			}
+
+			public function set phoneNumber(value:PhoneNumber):void
+			{
+				_phoneNumber = value;
+				if(_phoneNumber)
+					setPhone(_phoneNumber.toString());
+			}
+
+			public function setPhone(number:String):void{
+				phone1.text=number;
+				callSkype.href="skype:"+_phoneNumber.toString(true);
+				copyNumber.href="#";
+				copyNumber.customClickHandlers=true;
+				copyNumber.addEventListener(MouseEvent.CLICK,copyNumberHandler);
+			}
+			private function copyNumberHandler(event:Event):void{
+				Clipboard.generalClipboard.setData(ClipboardFormats.TEXT_FORMAT,_phoneNumber.toString(true));
+			}
+		]]>
+	</fx:Script>
+	<s:HGroup width="100%" verticalAlign="middle">
+		<s:Label id="phone1"/>
+		<ns:LinkLabel id="callSkype" text="Call with Skype"/>
+		<ns:LinkLabel id="copyNumber" text="Copy Number" />
+	</s:HGroup>
+</s:VGroup>

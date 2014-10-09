@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" width="400" 
+		  height="300" xmlns:ns="generic_components.*"
+		  creationComplete="vgroup1_creationCompleteHandler(event)">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import core.Logger;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import spark.events.TextOperationEvent;
+			[Bindable]
+			private var _dataProvider:ArrayCollection;
+			
+			public function get allowMultipleSelection():Boolean{
+				return this.list.allowMultipleSelection;
+			}
+			public function set allowMultipleSelection(value:Boolean):void
+			{
+				list.allowMultipleSelection = value;
+			}
+			public function get dragEnabled():Boolean{
+				return this.list.dragEnabled;
+			}
+			public function set dragEnabled(value:Boolean):void
+			{
+				list.dragEnabled = value;
+			}
+			public function get dragMoveEnabled():Boolean{
+				return this.list.dragMoveEnabled;
+			}
+			public function set dragMoveEnabled(value:Boolean):void
+			{
+				list.dragMoveEnabled= value;
+			}
+			public function get dropEnabled():Boolean{
+				return this.list.dropEnabled;
+			}
+			public function set dropEnabled(value:Boolean):void
+			{
+				list.dropEnabled= value;
+			}
+			public function get selectedItems():Vector.<Object>{
+				return this.list.selectedItems;
+			}
+			public function set selectedItems(value:Vector.<Object>):void
+			{
+				list.selectedItems= value;
+			}
+			public function get contentBackgroundColorCustom():uint{
+				return this.list.getStyle("contentBackgroundColor");
+			}
+			public function set contentBackgroundColorCustom(value:uint):void
+			{
+				this.list.setStyle("contentBackgroundColor",value);
+			}
+			
+			
+			public function set itemRenderer(value:IFactory):void
+			{
+				list.itemRenderer= value;
+			}
+			private var filter:FilterDataProvider=new FilterDataProvider();
+			public function get dataProvider():ArrayCollection
+			{
+				return _dataProvider;
+			}
+			public function get selectedItem():*{
+				return this.list.selectedItem;
+			}
+			public function set dataProvider(value:ArrayCollection):void
+			{
+				_dataProvider = value;
+				var text:String=searchField.text
+				
+				try{
+					filter_changeHandler(null);
+				}catch(e:Error){Logger.write("error in ListWithSearchField=>dataProvider ->filter_changeHandler");}
+				
+			}
+			protected function filter_changeHandler(event:TextOperationEvent):void
+			{
+				var text:String=searchField.text;
+				var res:ArrayCollection=filter.filter(text,dataProvider,list.itemToLabel);
+				this.list.dataProvider=res;
+				this.list.textTohighLight=text;
+				if(text.length>0&&this.list.dataProvider.length>0)
+					this.list.selectedIndex=0;
+			}
+			public function removeItem(item:*):void{
+				var index:int=dataProvider.getItemIndex(item);
+				if(index>=0)
+					this.dataProvider.removeItemAt(index);
+				index=this.list.dataProvider.getItemIndex(item);
+				if(index>=0)
+					this.list.dataProvider.removeItemAt(index);
+			}
+			
+			protected function vgroup1_creationCompleteHandler(event:FlexEvent):void
+			{
+				callLater(function():void{focusManager.setFocus( searchField);});
+			}
+			
+			public function set filterLabelText(value:String):void{
+				this.filterLabel.text=value;
+			}
+			public function get filterLabelText():String{
+				return this.filterLabel.text;
+			}
+			public function set title(value:String):void{
+				listMainLabel.text=value;
+			}
+			public function get title():String{
+				return listMainLabel.text;
+			}	
+			public function invalidateList():void
+			{
+				list.invalidateList();
+			}
+		]]>
+	</fx:Script>
+	<s:HGroup width="100%" verticalAlign="middle">
+		<s:HGroup width="100%">
+			<s:Label id="listMainLabel" />
+			<s:Spacer width="100%"/>
+			<s:Label id="filterLabel" text="Search:"/>
+		</s:HGroup>
+		
+		<s:TextInput id="searchField" width="100%" change="filter_changeHandler(event)"/>	
+	</s:HGroup>
+	<ns:ListCustom  id="list" width="100%" height="100%" 
+					itemRenderer="generic_components.skins.LabelHighlightItemRenderer" />
+</s:VGroup>

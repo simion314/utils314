@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:HGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"  height="24"
+		 verticalAlign="middle">
+	
+	<fx:Script>
+		<![CDATA[
+			import generic_components.auxcode.AdvancedFilterParams;
+			
+			import mx.charts.chartClasses.DateRangeUtilities;
+			public var grid:AdvancedDataGridCustom;
+			
+			public function get advancedFiterParams():AdvancedFilterParams{
+				var _to:Date=to.selectedDate;
+				if(_to&&!isNaN(_to.time))
+					_to.date+=1;
+				return new AdvancedFilterParams(textInput.text,from.selectedDate,to.selectedDate);
+			}
+			protected function apply_clickHandler(event:Event):void
+			{
+				if(grid)
+					grid.applyFilter(advancedFiterParams);
+				
+			}
+			
+			protected function clear_clickHandler(event:MouseEvent):void
+			{
+				clearInterface();
+				if(grid)
+					grid.applyFilter(advancedFiterParams);
+			}
+			public function clearInterface():void{
+				this.textInput.text="";
+				this.from.selectedDate=null;
+				this.to.selectedDate=null;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<s:Label id="labelDisplay" text="Filter:" />
+	<s:TextInput id="textInput" change="apply_clickHandler(event)" enter="apply_clickHandler(event)"/>
+	<s:Spacer width="1"/>
+	<s:Label text="From:"/>
+	
+	<mx:DateField id="from" />
+	<s:Label text="To:"/>
+	<mx:DateField id="to"/>
+	<s:Button id="apply" label="Apply" click="apply_clickHandler(event)"/>
+	
+<s:Button id="clear" label="Clear" click="clear_clickHandler(event)"/>
+	
+</s:HGroup>

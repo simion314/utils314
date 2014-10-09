@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dialogs:ModalDialog xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" 
+					 xmlns:mx="library://ns.adobe.com/flex/mx"
+					 xmlns:dialogs="dialogs.*" width="700" height="500" 
+					 xmlns:ns="generic_components.*"
+					 creationComplete="onCreationCompleteHandler(event)">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import generic_components.FilterDataProvider;
+			import generic_components.RemoveItemRenderer;
+			import generic_components.events.RemoveItemEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			private var _title:String="";
+			[Bindable]
+			private var _labelFunction:Function=null;
+			[Bindable]
+			private var _dataProvider:ArrayCollection;
+			[Bindable]
+			public var selected:ArrayCollection=new ArrayCollection();
+			private var filter:FilterDataProvider=new FilterDataProvider();
+			public var accepted:Boolean=false;
+			private var _alreadySelected:Array;
+			
+			[Bindable]
+			public function get alreadySelected():Array
+			{
+				return _alreadySelected;
+			}
+
+			public function set alreadySelected(value:Array):void
+			{
+				_alreadySelected = value;
+				for each (var i:* in _alreadySelected) 
+				{
+					addItem(i);
+				}
+				
+			}
+
+			[Bindable]
+			public function get labelFunction():Function
+			{
+				return _labelFunction;
+			}
+			
+			public function set labelFunction(value:Function):void
+			{
+				_labelFunction = value;
+			}
+
+			[Bindable]
+			public function get title():String
+			{
+				return _title;
+			}
+
+			public function set title(value:String):void
+			{
+				_title = value;
+			}
+
+			public function get dataProvider():ArrayCollection
+			{
+				return _dataProvider;
+			}
+			public function get selectedItem():*{
+				return this.list.selectedItem;
+			}
+			public function set dataProvider(value:ArrayCollection):void
+			{
+				_dataProvider = value;
+				filter_changeHandler(null);
+			}
+			protected function filter_changeHandler(event:TextOperationEvent):void
+			{
+				
+				if(!searchField) return;
+				var text:String=searchField.text;
+				var res:ArrayCollection=filter.filter(text,dataProvider,list.itemToLabel);
+				this.list.dataProvider=res;
+				this.list.textTohighLight=text;
+				if(list.dataProvider&&list.dataProvider.length>0)
+					this.list.selectedIndex=0;
+			
+				list_changeHandler(null);
+			}
+			public function removeItem(item:*):void{
+				var index:int=dataProvider.getItemIndex(item);
+				if(index>=0)
+					this.dataProvider.removeItemAt(index);
+				filter_changeHandler(null);
+//				index=this.list.dataProvider.getItemIndex(item);
+//				if(index>=0)
+//					this.list.dataProvider.removeItemAt(index);
+			}
+			
+			protected function onCreationCompleteHandler(event:FlexEvent):void
+			{
+				filter_changeHandler(null);
+				callLater(function():void{focusManager.setFocus( searchField);});
+				selectedList.addEventListener(RemoveItemEvent.REMOVE_ITEM_CLICK,onRemoveSelected);
+			}
+			
+			
+			
+			protected function list_doubleClickHandler(event:Event):void
+			{
+				var item:*=this.list.selectedItem;
+				addItem(item);
+				done.enabled=(selected.length!=0);
+			}
+			private function addItem(item:*):void{
+				if(!item) return;
+				removeItem(item);
+				this.selected.addItem(item);
+			}
+			
+			protected function done_clickHandler(event:MouseEvent):void
+			{
+				accepted=true;
+				this.close();
+			}
+			
+			protected function list_keyDownHandler(event:KeyboardEvent):void
+			{
+				if(event.keyCode==Keyboard.ENTER||event.keyCode==Keyboard.SPACE){
+					list_doubleClickHandler(null);
+				}
+			}
+			
+			
+			protected function selectedList_doubleClickHandler(event:MouseEvent):void
+			{
+				removeSelectedItem(selectedList.selectedItem);
+			}
+			
+			protected function list_changeHandler(event:IndexChangeEvent):void
+			{
+				var item:*=this.list.selectedItem;
+				this.add.enabled=(item!=null);
+			}
+			
+			protected function onRemoveSelected(event:RemoveItemEvent):void
+			{
+				removeSelectedItem(event.data);
+			}
+			
+			private function removeSelectedItem(item:*):void{
+				if(!item) return;
+				this.selectedList.dataProvider.removeItemAt(selectedList.dataProvider.getItemIndex(item));
+				this.dataProvider.addItem(item);
+				//refresh filter
+				filter_changeHandler(null);
+				done.enabled=(selected.length!=0);
+			}
+
+		]]>
+	</fx:Script>
+	<s:Panel id="mainPanel" title="{title}" width="100%" height="100%">
+		<s:layout>
+			<s:HorizontalLayout gap="12" paddingBottom="6" paddingLeft="6" paddingRight="6" paddingTop="6"/>
+		</s:layout>
+		<s:VGroup width="50%" height="100%">
+			<s:HGroup width="100%" verticalAlign="middle">
+				<s:Label id="filterLabel" minWidth="100" text="Search:"/>
+				<s:TextInput id="searchField" width="100%" change="filter_changeHandler(event)"/>	
+			</s:HGroup>
+			<ns:ListCustom  id="list" width="100%" height="100%" 
+							doubleClickEnabled="true" labelFunction="{labelFunction}"
+							itemRenderer="generic_components.skins.LabelHighlightItemRenderer"
+							doubleClick="list_doubleClickHandler(event)"
+							keyDown="list_keyDownHandler(event)"
+							change="list_changeHandler(event)"/>
+
+			<s:Spacer width="100%" height="21"/>
+		</s:VGroup>
+		<s:VGroup width="60" verticalAlign="middle" height="100%">
+			<s:Button id="add" label="Add" width="100%" enabled="false" click="list_doubleClickHandler(event)"/>
+		</s:VGroup>
+		<s:VGroup width="50%" height="100%">
+			<s:Label height="22" text="Selected Items" verticalAlign="middle"/>
+		<s:List id="selectedList" width="100%" height="100%" dataProvider="{selected}" labelFunction="{labelFunction}"
+				doubleClickEnabled="true" doubleClick="selectedList_doubleClickHandler(event)"
+				itemRenderer="generic_components.RemoveItemRenderer"/>
+			<s:HGroup width="100%">
+				<s:Spacer width="100%"/>
+				<s:Button id="cancel" label="Cancel" click="close()"/>
+				<s:Button id="done" label="Done" click="done_clickHandler(event)" enabled="false"/>
+			</s:HGroup>
+		</s:VGroup>
+	</s:Panel>
+</dialogs:ModalDialog>

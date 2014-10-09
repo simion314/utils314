@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="true" xmlns:ns="generic_components.*">
+	<fx:Script>
+		<![CDATA[
+			import spark.components.List;
+			
+			override public function set data(value:Object):void
+			{
+				if(data==value){
+					super.data = value;
+					return;
+				}
+				if(parentDocument&&parentDocument.parent)
+				{
+					label2.textTohighLight=parentDocument.parent['textTohighLight'];
+					//trace ("TTH is "+label2.textTohighLight+" for "+label2.text);
+				}
+				
+				super.data = value;
+				if(data==null)
+				{
+					label2.text=null;
+					return;
+				}
+				if(parentDocument.parent is List){
+					var l:List=parentDocument.parent as List;
+					if(l.labelField&&l.labelField!="label")
+						label2.text=data[l.labelField];
+					else{
+						if(l.labelFunction!=null)
+							label2.text=l.labelFunction(data);
+						else
+							label2.text=data.toString();
+					}
+				}
+				else
+					label2.text=data.toString();
+				
+			
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<ns:LabelHighlight id="label2" />
+	
+</s:ItemRenderer>

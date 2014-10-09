@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Label xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 click="label1_clickHandler(event)"
+		 doubleClickEnabled="true" mouseChildren="false">
+	<fx:Script>
+		<![CDATA[
+			import core.EmailUtils;
+			import core.LinkResolver;
+			import core.StringUtils;
+			
+			//import mx.formatters.DateFormatter;
+			private var _validEmail:Boolean=false;
+			private var _href:String="";
+
+			public function get href():String
+			{
+				return _href;
+			}
+
+			public function set href(value:String):void
+			{
+				_href = value;
+			if(href&&href!="")
+				linkMode=true;
+			else 
+				linkMode=false;
+			}
+			private function set linkMode(val:Boolean):void{
+				useHandCursor=val;
+				buttonMode=val;
+				if(val){
+					this.setStyle( 'color','blue');
+					this.setStyle( 'textDecoration','underline');
+				}
+				else{
+					this.setStyle( 'color','black');
+					this.setStyle( 'textDecoration','none');
+				}
+			}
+			
+			override public function set text(value:String):void
+			{
+				if(value==null||value=='null'){
+					super.text = '';
+					return;
+				}
+				if(href&&href!=""){
+					super.text=value;
+					return;
+				}
+				var val:String=StringUtils.isDateTime(value)
+				if(val){
+					super.text = val;
+					return;
+				}
+					
+				if((value&&EmailUtils.validateEmail(value))){
+					_validEmail=true;
+					linkMode=true;
+				}
+				else{
+					_validEmail=false;
+					linkMode=false;
+				}
+				//try the LinkResolver
+				for each (var resolver:Function in LinkResolver.resolverFunctions) 
+				{
+					var res:Array=resolver(value);
+					if(res)
+					{
+						this.href=res[0];
+						value=res[1];
+						break;
+					}
+					
+				}
+			
+				super.text = value;
+			}
+			
+			protected function label1_clickHandler(event:MouseEvent):void
+			{
+		
+				if(customClickHandlers)
+					return;
+				if(_validEmail)
+					EmailUtils.openEmailClient("",text,"","");
+				else{
+					if(href&&href!="")
+						navigateToURL(new URLRequest(href));
+					
+				}
+			}
+			
+			
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	<fx:Boolean id="customClickHandlers" >false</fx:Boolean>
+	</fx:Declarations>
+	
+	
+</s:Label>

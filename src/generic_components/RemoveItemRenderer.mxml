@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="true"
+				width="100%"
+				mouseOver="remove.visible=true" mouseOut="remove.visible=false"
+				click="itemrenderer1_clickHandler(event)">
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import generic_components.events.RemoveItemEvent;
+			
+			import mx.events.FlexEvent;
+			
+			import spark.components.List;
+			
+		
+		//	[Event(name="removeItemClick", type="spark.events.Event")]
+			public function deleteItem():void {
+				dispatchEvent(new RemoveItemEvent(RemoveItemEvent.REMOVE_ITEM_CLICK,data,true,true));
+			}
+			
+			override public function set data(value:Object):void
+			{
+				// TODO Auto Generated method stub
+				super.data = value;
+				if(data==null)
+				{
+					label2.text=null;
+					return;
+				}
+				if(parentDocument&&parentDocument.parent is List){
+					var l:List=parentDocument.parent as List;
+					label2.text=l.itemToLabel(data)
+//					if(l.labelField&&l.labelField!="label")
+//						label2.text=data[l.labelField];
+//					else{
+//						if(l.labelFunction!=null)
+//							label2.text=l.labelFunction(data);
+//						else
+//							label2.text=data.toString();
+//					}
+				}
+				else
+					label2.text=data.toString();
+			}
+			
+			
+		
+			
+			protected function itemrenderer1_clickHandler(event:MouseEvent):void
+			{
+				dispatchEvent(new RemoveItemEvent(RemoveItemEvent.ITEM_CLICK,data,true,true));	
+			}
+			
+		]]>
+	</fx:Script>
+	
+		<s:Label id="label2" top="3"  bottom="3"  left="6" right="6"  verticalCenter="0"
+				 maxDisplayedLines="1" lineBreak="toFit" />
+		<s:Button id="remove"  right="6"  width="32"  label="X" click="deleteItem()"
+				  verticalCenter="0" visible="false"/>
+	
+</s:ItemRenderer>

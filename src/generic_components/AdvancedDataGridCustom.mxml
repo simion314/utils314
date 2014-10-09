@@ -1,0 +1,496 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:AdvancedDataGrid xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					 xmlns:s="library://ns.adobe.com/flex/spark" 
+					 xmlns:mx="library://ns.adobe.com/flex/mx"
+					 implements="generic_components.IPersistentComponent"
+					 sortExpertMode = "true"
+					 sortItemRenderer="generic_components.auxcode.MySortItemRenderer"
+					 creationComplete="advanceddatagrid1_creationCompleteHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import core.Logger;
+			import core.PrintAdvancedGridCustom;
+			import core.StringUtils;
+			import core.UI_PreferencesStore;
+			
+			import crypto.MD5;
+			
+			import generic_components.auxcode.AdvancedFilterParams;
+			import generic_components.auxcode.MySortItemRenderer;
+			import generic_components.skins.HighlightRendererAdvancedDataGrid;
+			import generic_components.skins.LinkLabel;
+			
+			import mx.collections.ArrayCollection;
+			import mx.collections.ICollectionView;
+			import mx.collections.ISort;
+			import mx.collections.ISortField;
+			import mx.collections.Sort;
+			import mx.collections.SortField;
+			import mx.controls.advancedDataGridClasses.AdvancedDataGridColumn;
+			import mx.controls.listClasses.IListItemRenderer;
+			import mx.core.UIComponent;
+			import mx.core.mx_internal;
+			import mx.events.FlexEvent;
+			
+			private var _useLinkLabelRenderer:Boolean=false;
+			private var _defaultColumns:Array;
+			private var _sortFieldsForSorting:Array;//we can give the columns we want to use for sorting
+			private var _hideNonDefaultColmns:Boolean=false;
+			private var _textTohighLight:String;
+			private var _columnsRenameDictionary:Dictionary;
+			private var _headerStateId:String;//i will use this to avoid the conflict when 2 grids will display same data types but should show different columns2
+
+			public function get sortFieldsForSorting():Array
+			{
+				return _sortFieldsForSorting;
+			}
+
+			public function set sortFieldsForSorting(value:Array):void
+			{
+				_sortFieldsForSorting = value;
+			}
+
+			public function get headerStateId():String
+			{
+				return _headerStateId;
+			}
+
+			public function set headerStateId(value:String):void
+			{
+				_headerStateId = value;
+			}
+
+			public function get columnsRenameDictionary():Dictionary
+			{
+				return _columnsRenameDictionary;
+			}
+
+			public function set columnsRenameDictionary(value:Dictionary):void
+			{
+				_columnsRenameDictionary = value;
+			}
+
+			public function get headerLabelFunction():Function
+			{
+				return _headerLabelFunction;
+			}
+
+			public function set headerLabelFunction(value:Function):void
+			{
+				_headerLabelFunction = value;
+			}
+			public function get textTohighLight():String
+			{
+				return _textTohighLight;
+			}
+			
+			public function set textTohighLight(value:String):void
+			{
+				
+				_textTohighLight = value;
+				callLater(invalidateItemRenderers);
+			}
+			public function invalidateItemRenderers():void
+			{
+				for each ( var rendererArray:Array in listItems )
+				{
+					for each ( var renderer:Object in rendererArray)
+					{
+						if( renderer is HighlightRendererAdvancedDataGrid)
+						{
+							(renderer as HighlightRendererAdvancedDataGrid).updateHighLight();
+						}
+					}
+				}
+			}
+			private var _headerLabelFunction:Function=null;
+			public function get hideNonDefaultColmns():Boolean
+			{
+				return _hideNonDefaultColmns;
+			}
+
+			public function set hideNonDefaultColmns(value:Boolean):void
+			{
+				_hideNonDefaultColmns = value;
+			}
+
+			public function get defaultColumns():Array
+			{
+				return _defaultColumns;
+			}
+
+			public function set defaultColumns(value:Array):void
+			{
+				_defaultColumns = value;
+			}
+
+			public function get useLinkLabelRenderer():Boolean
+			{
+				return _useLinkLabelRenderer;
+			}
+
+			public function set useLinkLabelRenderer(value:Boolean):void
+			{
+				
+				_useLinkLabelRenderer = value;
+				if(value){
+					setLinkItemRenderer();
+				}
+				else{
+					
+				}
+			}
+			private function setLinkItemRenderer():void
+			{
+				
+				var columns:Array=this.columns;
+				columns.forEach(fLinkIR);
+				function fLinkIR(item:*,i:int,a:Array):void
+				{
+					AdvancedDataGridColumn(item).itemRenderer=new ClassFactory(LinkItemRenderer); 
+				}
+			
+			}
+			
+		 private	function createContextMenu(columns:Array):void{
+				var context:NativeMenu = new NativeMenu();
+				for each (var col:AdvancedDataGridColumn in columns){
+					var menuI:NativeMenuItem = new NativeMenuItem(col.headerText);
+					menuI.checked = col.visible;
+					menuI.data = col;
+					context.addItem(menuI);
+				}
+				//add a print entry
+				var printItem:NativeMenuItem=new NativeMenuItem("Print Table");
+				printItem.data="print";
+				//context.addItem(printItem);
+				
+				context.addEventListener(Event.SELECT, function(e:Event):void {
+					var t:NativeMenuItem = e.target as NativeMenuItem;
+					if(t.data=="print"){
+						callLater(print);
+						return;
+					}
+					t.checked = !t.checked;
+					var c:AdvancedDataGridColumn=AdvancedDataGridColumn(t.data);
+					 if( t.checked){
+						 c.visible=true;
+					//	 c.width=80;
+					 }else{
+						 c.visible=false;
+					//	 c.width=0;
+					 }
+				});
+				
+				this.contextMenu = context;
+			}
+			public function print():void{
+				var printer:PrintAdvancedGridCustom=new PrintAdvancedGridCustom(this);
+				printer.doPrint();
+			}
+			override public function set dataProvider(value:Object):void
+			{
+				if(dataProvider)
+					saveState(null);
+				//delete the current columns
+				this.columns=[];
+				this.generatedColumns=true;
+				super.dataProvider = value;
+		
+				if(value!=null){
+					
+					callLater(loadState,[null]);;
+				}
+				else{
+				
+//						if(useLinkLabelRenderer)
+//							setLinkItemRenderer();
+					}
+			}
+			
+//			override mx_internal function set $width(value:Number):void
+//			{
+//				// TODO Auto Generated method stub
+//				super.mx_internal::$width = value;
+//			}
+			
+			override public function set width(value:Number):void
+			{
+				// TODO Auto Generated method stub
+				super.width = value;
+			}
+			
+			override public function set scaleX(value:Number):void
+			{
+				// TODO Auto Generated method stub
+				super.scaleX = value;
+			}
+			
+			override public function set scaleY(value:Number):void
+			{
+				// TODO Auto Generated method stub
+				super.scaleY = value;
+			}
+			
+			
+			public function loadState(manager:UI_PreferencesStore):void{
+				if(manager)return;//we load only when provider changes
+				if(!this.dataProvider||this.dataProvider.length<=0)
+					return;
+				var properties:Array=getProviderProperties();
+				var propname:String;
+				if(headerStateId)
+					propname=headerStateId;
+				else
+					propname="gridstate"+getArraySignature(properties);
+				
+				var h:Object=UI_PreferencesStore.Instance.getValue(propname);
+				var sortFields:Array=UI_PreferencesStore.Instance.getValue(propname+"-sort");
+				setSort(sortFields,properties);
+				var headers:Array=h as Array;
+				
+				var cols:Array=this.columns;;
+				
+				if(headers)
+				{
+					//trace("headers loaded from UI store");
+					cols=loadStateFromHeaders(headers);	
+				}
+				else
+				{
+					if(this.columns.length==0)
+					{
+						trace("AdvancedDGCustom loadState columns.length is 0");
+						callLater(loadState,[null]);
+						return;
+					}
+					if(defaultColumns)
+						cols=orderAndOrHideNonDefaultColumns(this.columns);
+				}
+				beautifyColumns(cols);
+				this.columns=cols;
+				//hideNonDefaultColumns(cols);
+				createContextMenu(cols);
+				if(useLinkLabelRenderer)
+					callLater(setLinkItemRenderer);
+				
+			}
+			
+			private function loadStateFromHeaders(headers:Array):Array{
+				var count:int=headers.length;
+				var cols:Array=[];
+				for(var i:int=0;i<count;i++)
+				{
+					var col:Object=headers[i] ;
+					
+					var acol:AdvancedDataGridColumn=new AdvancedDataGridColumn(col.headerText);
+					acol.width=col.width;
+					acol.headerText=col.headerText;
+					acol.dataField=col.dataField;
+					acol.visible=col.visible;
+					if(useLinkLabelRenderer)
+						acol.itemRenderer=new ClassFactory(LinkItemRenderer); 
+					cols.push(acol);
+				}
+				return cols;
+			}
+			
+			private function beautifyColumns(cols:Array):void{
+				if(headerLabelFunction!=null)
+				cols.forEach(function(col:AdvancedDataGridColumn,i:int,a:Array):void{				
+					col.headerText=headerLabelFunction(col);
+				});
+			}
+			
+			
+			private function  getArraySignature(a:Array):String{
+				if(a.length<=0)
+					return "";
+				var res:String="";
+				for each (var i:Object in a) 
+				{
+					if(i is String)
+						res+=i;
+					else
+						res+=i.headerText;
+				}
+				return res;
+				//return MD5.encrypt( res);
+			}
+			public function saveState(manager:UI_PreferencesStore):void{
+				if(!this.dataProvider||this.dataProvider.length<=0)
+					return;
+				var headers:Array=getHeaderData();
+				if(headers==null)
+					return;
+				var properties:Array=getProviderProperties();
+				
+				var propname:String;
+				if(headerStateId)
+					propname=headerStateId;
+				else
+					propname="gridstate"+getArraySignature(properties);
+				
+				var h:Object=UI_PreferencesStore.Instance.getValue(propname);
+				
+				
+				trace("save prop name "+propname);
+				UI_PreferencesStore.Instance.setValue(propname,headers);
+				UI_PreferencesStore.Instance.setValue(propname+"-sort",getSortColumns());
+			}
+			public  function getHeaderData():Array{
+				var res:Array=new Array();
+				var count:int=this.columns.length;
+				if(count==0)
+					return null;
+				
+				for(var i:int=0;i<count;i++){
+					var cdata:GridHeaderData=new GridHeaderData();
+					var column:AdvancedDataGridColumn=this.columns[i] as AdvancedDataGridColumn;
+					cdata.dataField=column.dataField;
+					cdata.headerText=column.headerText;
+					cdata.visible=column.visible;
+					cdata.width=column.width;
+					res.push(cdata);
+				}
+				return res;
+			}
+			private function setSort(sortFields:Array,providerProperties:Array):void{
+				var sort:ISort;
+				if(!sortFields||sortFields.length==0){
+					if(this.sortFieldsForSorting&&this.sortFieldsForSorting.length>0)
+					{
+						var descending:Boolean;
+						var provFields:Array=providerProperties.map(function (it:String,i:int,a:Array):String{return it.toLowerCase()});
+						for each (var field:String in sortFieldsForSorting) 
+						{
+							var index:int=provFields.indexOf(field.toLowerCase());
+							if(index>=0)
+							{
+								descending=(field.toUpperCase()==field);
+								sort=new Sort();
+								sort.fields=[new SortField(providerProperties[index],false,descending)];
+								break;
+							}	
+						}
+					}
+					else return;
+				}
+				else
+				{
+					sort=new Sort();
+					sort.fields=sortFields;
+				}
+				if(sort&&this.dataProvider){
+					ICollectionView(dataProvider).sort=sort;
+					ICollectionView(dataProvider).refresh();
+					//if no item is selected scrol to the top
+					if(this.selectedIndex<0)
+						this.verticalScrollPosition=0;
+				}
+			}
+			private function getSortColumns():Array{
+				if(this.dataProvider&&this.dataProvider.sort){
+					var res:Array= ICollectionView(dataProvider).sort.fields;
+					return res;
+				}
+				else
+					return [];
+			}
+			private function getObjectProperties(obj:Object):Array{
+				var res:Array=[];
+				for(var id:String in obj) {
+					if(id=="mx_internal_uid"||id=="uid")
+						continue;
+					res.push(id);
+				}
+				return res;
+			}
+			private function getProviderProperties():Array{
+				try{
+					var res:Array= getObjectProperties(this.dataProvider[0]);
+					res=res.sort();
+					return res;
+				}
+				catch(e:Error){
+					return [];
+				}
+				return [];
+			}
+			
+			private function orderAndOrHideNonDefaultColumns(columns:Array):Array
+			{	
+					var res:Array=[];
+					defaultColumns.forEach(function(colName:String,i:int,a:Array):void{
+						res=res.concat(columns.filter(function(col:AdvancedDataGridColumn,i:int,a:Array):Boolean{
+							return (col.dataField==colName);	
+						}));
+					});	
+					
+					
+					
+					//if we have at least one column as visible we add the rest as hidden
+					var hide:Boolean=hideNonDefaultColmns;
+					if(res.length==0)
+						hide=false;
+					
+					columns.forEach(function(col:AdvancedDataGridColumn,i:int,a:Array):void{
+						if(res.indexOf(col)<0){
+							col.visible=!hide;
+							res.push(col);
+						}
+					});
+					
+					return res;	
+			}
+			
+			protected function advanceddatagrid1_creationCompleteHandler(event:FlexEvent):void
+			{
+				UI_PreferencesStore.Instance.addComponent(this);
+			}
+			public function applyFilter(params:AdvancedFilterParams):void{
+				if(!dataProvider) return;
+				if(params.isEmpty){
+					ArrayCollection(this.dataProvider).filterFunction=null;
+					ArrayCollection(this.dataProvider).refresh();
+					textTohighLight="";
+					return;
+				}
+				var visibleCols:Array=this.columns.filter(function(it:AdvancedDataGridColumn,i:int,a:Array):Boolean{
+				return it.visible;});
+				ArrayCollection(this.dataProvider).filterFunction=filterFunction;
+				ArrayCollection(this.dataProvider).refresh();
+				textTohighLight=params.text;
+				
+				function filterFunction(item:*):Boolean{
+					
+					//if we have a filter function in params
+					if(params.filterFunction!=null){
+						if(params.filterFunction(item))
+							return true;
+					}
+					var datePassed:Boolean;
+					var textPassed:Boolean;
+					
+					for each (var c:AdvancedDataGridColumn in visibleCols) 
+					{
+						var prop:String=c.dataField;
+						var val:*=item[prop];
+						if(!val)continue;
+						if(!datePassed)
+							datePassed=params.applyFilterAsDate(val);
+						if(!textPassed)
+							textPassed=params.applyFilterAsText(val);
+						if(datePassed&&textPassed)
+							return true;
+					}
+					return false;
+					
+				}
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+</mx:AdvancedDataGrid>

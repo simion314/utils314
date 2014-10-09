@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:MXAdvancedDataGridItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+								  xmlns:s="library://ns.adobe.com/flex/spark" 
+								  xmlns:mx="library://ns.adobe.com/flex/mx" 
+								  focusEnabled="true" xmlns:ns="generic_components.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import generic_components.AdvancedDataGridCustom;
+			
+			import mx.controls.AdvancedDataGrid;
+			
+			import spark.components.List;
+			public function updateHighLight():void{
+				if(owner is AdvancedDataGridCustom){
+					label2.textTohighLight=owner['textTohighLight'];	
+				}
+				label2.updateHighLight();
+			}
+			override public function set data(value:Object):void
+			{
+				if(data==value){
+					super.data = value;
+					return;
+				}
+				if(owner is AdvancedDataGridCustom){
+					label2.textTohighLight=owner['textTohighLight'];	
+					super.data = value;
+				}
+				else{
+					super.data = value;
+					
+				}
+	
+				
+			}
+			
+		]]>
+	</fx:Script>
+	<ns:LabelHighlight id="label2" top="0" left="0" right="0" bottom="0" text="{listData.label}" />
+</s:MXAdvancedDataGridItemRenderer>

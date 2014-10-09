@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:SkinnablePopUpContainer xmlns:fx="http://ns.adobe.com/mxml/2009"
+						   xmlns:s="library://ns.adobe.com/flex/spark"
+						   xmlns:mx="library://ns.adobe.com/flex/mx"
+						   keyDown="skinnablepopupcontainer1_keyDownHandler(event)"
+						   open="skinnablepopupcontainer1_openHandler(event)"
+						   close="skinnablepopupcontainer1_closeHandler(event)"
+						   creationComplete="skinnablepopupcontainer1_creationCompleteHandler(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import core.Logger;
+			import core.StageReference;
+			
+			import flash.desktop.NativeApplication;
+			
+			import mx.charts.renderers.ShadowLineRenderer;
+			import mx.core.FlexGlobals;
+			import mx.events.FlexEvent;
+			
+			import spark.components.WindowedApplication;
+			import spark.events.PopUpEvent;
+			
+			private var disabledMenus:Vector.<NativeMenuItem> = new Vector.<NativeMenuItem>();
+			private var skipMenuDisabling:Boolean=false;
+			public var canceled:Boolean=false;
+			public var prevent_ESC_cacelDialog:Boolean=false;
+			public static const DONT_DISABLE:String="DONT_DISABLE";
+			protected function skinnablepopupcontainer1_keyDownHandler(event:KeyboardEvent):void {
+				if ( event.keyCode == Keyboard.ESCAPE&&prevent_ESC_cacelDialog==false)
+				{
+					this.canceled=true;
+					this.close();
+				}
+					
+			}
+			
+			
+			
+			protected function skinnablepopupcontainer1_openHandler(event:PopUpEvent):void {
+				centerWindow();
+				if(owner!=null&&owner is ModalDialog)
+					skipMenuDisabling=true;
+				else
+					enable_disableAllMenus(false);
+			}
+			
+			private function centerWindow():void {
+				var x:Number;
+				var y:Number;
+				if (owner != null && owner.width > this.width && owner.height > this.height) {
+					var ownerX:int=owner.x;
+					var ownerY:int=owner.y;
+					if(owner.y==0&&owner.x==0&&!(owner is WindowedApplication ))
+					{
+						var globalCoords:Point = owner.localToGlobal(new Point(0,0));	
+						ownerX=globalCoords.x;
+						ownerY=globalCoords.y;
+					}
+					x = ownerX + (this.owner.width - this.width) / 2;
+					y = ownerY + (this.owner.height - this.height) / 2;
+				}
+				else {
+					var win:DisplayObject = null;
+					try {
+						win = NativeApplication.nativeApplication.activeWindow.stage;
+					}
+					catch (error:Error) {
+						win = null;
+					}
+					if (!win)
+						win = StageReference.instance;
+					
+					x = (win.width - this.width) / 2;
+					y = (win.height - this.height) / 2;
+					
+				}
+				
+				this.move(x, y);
+			}
+			
+			private function setEnabledStateeMenu(menu:NativeMenu, enable:Boolean):void {
+				if (menu == null)
+				{
+					Logger.write ("inside ModalDialog.setEnabledStateeMenu menu is null"); 
+					return;
+				}
+				
+				var i:int = 0, length:int = menu.numItems;
+				
+				for (i = 0; i < length; i++) {
+					try {
+						var menuItem:NativeMenuItem = menu.getItemAt(i);
+						if (menuItem.submenu != null)
+							setEnabledStateeMenu(menuItem.submenu, enable);
+						
+						//if i want to disable the menu and if the menu is already disabled
+						//record is as disabled and go to theenext menu
+						if (enable == false && menuItem.enabled == false) {
+							this.disabledMenus.push(menuItem);
+							continue;
+						}
+						//if  iwant to enable first check if the menu must be let as disabled
+						if (enable) {
+							//if this menu was disabled skip it
+							if (this.disabledMenus.indexOf(menuItem) >= 0)
+								continue;
+						}
+						//skip the quit menu
+						if(menuItem.data==DONT_DISABLE){
+							//do nothing
+						}
+						else
+							menuItem.enabled = enable;
+						//close_MenuItem
+						//appMenu
+					}
+					catch (error:Error) {
+						}
+				}
+			}
+			
+			private function enable_disableAllMenus(enable:Boolean):void {
+				var menu:NativeMenu;
+				if (NativeApplication.supportsMenu) {
+					menu = NativeApplication.nativeApplication.menu;
+				}
+				else {
+					menu = WindowedApplication(FlexGlobals.topLevelApplication).nativeWindow.menu;
+				}
+				setEnabledStateeMenu(menu, enable);
+				//DON'T FORGET to empty the vector with the menus if we enabled them
+				if (enable)
+					this.disabledMenus = new Vector.<NativeMenuItem>();
+			}
+			
+			protected function skinnablepopupcontainer1_closeHandler(event:PopUpEvent):void {
+				if(skipMenuDisabling)
+					return;
+				enable_disableAllMenus(true);
+			}
+			
+			protected function skinnablepopupcontainer1_creationCompleteHandler(event:FlexEvent):void {
+				centerWindow();
+			}
+			
+			override public function open(_owner:DisplayObjectContainer, modal:Boolean = false):void {
+				if (_owner == null) {
+					_owner = StageReference.instance;
+				}
+				this.owner=_owner;
+				super.open(owner, modal);
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+</s:SkinnablePopUpContainer>
