@@ -4,7 +4,7 @@
     <configurations>
       <configuration name="utils314" target-platform="Desktop" output-type="Library" output-file="utils314.swc" output-folder="$MODULE_DIR$/bin">
         <dependencies>
-          <sdk name="Flex4_12Air4" />
+          <sdk name="Flex4.13Air15" />
         </dependencies>
         <compiler-options>
           <map>
@@ -24,7 +24,7 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="Flex4_12Air4" jdkType="Flex SDK Type (new)" />
+    <orderEntry type="jdk" jdkName="Flex4.13Air15" jdkType="Flex SDK Type (new)" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
