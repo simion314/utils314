@@ -1,0 +1,134 @@
+<?xml version="1.0"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+         xmlns:s="library://ns.adobe.com/flex/spark"
+         creationComplete="cc(event)"
+         resize="resizeHandler(event)"
+         addedToStage="addedToStageHandler(event)"
+         removedFromStage="removedFromStageHandler(event)">
+
+
+    <fx:Script><![CDATA[
+        import crypto.Base64;
+
+        import mx.events.FlexEvent;
+        import mx.events.ResizeEvent;
+
+        public const view:StageWebView = new StageWebView(true);
+
+        private function cc(event:FlexEvent):void {
+            view.stage = stage;
+            view.addEventListener(LocationChangeEvent.LOCATION_CHANGE, onLocationChange);
+            view.addEventListener(LocationChangeEvent.LOCATION_CHANGING, onLocationChanging);
+            setViewSize();
+        }
+
+        private const SENDING_PROTOCOL:String = "about:";
+
+        private function onLocationChanging(e:LocationChangeEvent):void {
+            if (e.type != LocationChangeEvent.LOCATION_CHANGING) {
+                if (hasEventListener(e.type))
+                    dispatchEvent(e);
+                return;
+            }
+            var currLocation:String = unescape((e as LocationChangeEvent).location);
+            //Logger.writeLine("onLocationChange " + currLocation);
+            if (currLocation.indexOf(SENDING_PROTOCOL + '[SWVData]') != -1) {
+                e.preventDefault();
+                parseCallBack(currLocation.split(SENDING_PROTOCOL + '[SWVData]')[1]);
+            }
+
+        }
+
+        private var jsAccessibleFunctions:Dictionary = new Dictionary();
+
+        public function addJsAccessibleFunction(name:String, fun:Function):void {
+            jsAccessibleFunctions[name] = fun;
+        }
+
+        private function parseCallBack(base64String:String):void {
+            var _serializeObject:* = JSON.parse(Base64.decode(base64String).toString());
+            trace('_serializeObject =>' + _serializeObject['method']);
+            var returnValue:* = null;
+            var _callBackFunction:Function = _callBacks[ _serializeObject['method'] ];
+            if (_callBackFunction == null) {
+                trace("_callBackFunction is null");
+                return;
+            }
+            if (_serializeObject['arguments'].length != 0) {
+                returnValue = _callBackFunction.apply(null, _serializeObject.arguments);
+            }
+            else {
+                returnValue = _callBackFunction();
+            }
+            if (_serializeObject['callBack'] != undefined && returnValue != null) {
+                call(_serializeObject['callBack'], null, returnValue);
+            }
+
+
+        }
+
+        private function onLocationChange(event:LocationChangeEvent):void {
+            _location = view.location;
+        }
+
+        override public function set visible(value:Boolean):void {
+            super.visible = value;
+            view.stage = value ? stage : null;
+        }
+
+        private function setViewSize():void {
+            var p:Point = this.localToGlobal(new Point(0, 0));
+            view.viewPort = new Rectangle(p.x, p.y, width, height);
+        }
+
+        private function resizeHandler(event:ResizeEvent):void {
+            setViewSize();
+        }
+
+        public function set location(location:String):void {
+            view.loadURL(location);
+        }
+
+        [Bindable]
+        private var _location:String;
+        [Bindable]
+        public function get location():String {
+            return _location;
+        }
+
+        private function addedToStageHandler(event:Event):void {
+            if (view) {
+                view.stage = stage;
+                setViewSize();
+            }
+        }
+
+        private function removedFromStageHandler(event:Event):void {
+            if (view)
+                view.stage = null;
+        }
+
+        /**
+         * Makes a call to a javascript function
+         * @param functionName Name of the function to call
+         * @param arguments Coma separated arguments to pass to Javascript function
+         */
+        public function call(functionName:String, callback:Function = null, arguments:Array = null):void {
+            var _serializeObject:* = {};
+            _serializeObject['method'] = functionName;
+            _serializeObject['arguments'] = arguments;
+            if (callback != null) {
+                addCallback('[SWVMethod]' + functionName, callback);
+                _serializeObject['callBack'] = '[SWVMethod]' + functionName;
+            }
+
+            view.loadURL("javascript:StageWebViewBridge314.doCall('" + Base64.encode(JSON.stringify(_serializeObject)) + "')");
+        }
+
+        private var _callBacks:Dictionary = new Dictionary();
+
+        public function addCallback(name:String, callback:Function):void {
+            _callBacks[ name ] = callback;
+        }
+        ]]></fx:Script>
+</s:Group>
