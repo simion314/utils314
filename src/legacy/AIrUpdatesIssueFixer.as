@@ -15,7 +15,7 @@ import spark.components.WindowedApplication;
 
 public class AIrUpdatesIssueFixer {
 
-    public static function performAppStorageFolderPAthChangeFix(continueInit:Function, migrationRestartRequired:String, performMigrationQuestionMessage:String = null):Boolean {
+    public static function performAppStorageFolderPathChangeFix(continueInit:Function, migrationRestartRequired:String, performMigrationQuestionMessage:String = null):Boolean {
         if (Capabilities.os.indexOf("Mac") < 0) {
             return false;
         }
