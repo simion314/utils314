@@ -1,5 +1,6 @@
 package com.pageone.log {
 
+import flash.events.ErrorEvent;
 import flash.filesystem.File;
 import flash.filesystem.FileMode;
 import flash.filesystem.FileStream;
@@ -100,6 +101,10 @@ public class Logger {
         writeTimeLine(msg + " " + err);
     }
 
+    public static function writeErrorEvent(msg:String, e:ErrorEvent):void {
+        var err:String = e.toString() + " " + e.toString();
+        writeTimeLine(msg + " " + err);
+    }
     public static function writeTimeLine(s:String):void {
         try {
             stream.writeUTFBytes(new Date().toLocaleString() + ": " + s);
