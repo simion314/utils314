@@ -15,11 +15,23 @@ import spark.components.WindowedApplication;
 
 public class AIrUpdatesIssueFixer {
 
+    public static function fromNewToOldPath(file:File):File{
+        if (Capabilities.os.indexOf("Mac") < 0) {
+            return null;
+        }
+        if (file.nativePath.indexOf("/Application Support") < 0)
+            return null;
+        var oldPath:String = file.nativePath.replace("Application Support", "Preferences");
+        var oldFile:File = new File(oldPath);
+        return oldFile;
+    }
     public static function performAppStorageFolderPathChangeFix(continueInit:Function, migrationRestartRequired:String, performMigrationQuestionMessage:String = null):Boolean {
         if (Capabilities.os.indexOf("Mac") < 0) {
             return false;
         }
         var newDir:File = File.applicationStorageDirectory;
+        if(newDir.parent.nativePath.indexOf("/Application Support")<0)
+            return false;
         var oldPath:String = newDir.nativePath.replace("Application Support", "Preferences");
         var oldDir:File = new File(oldPath);
         if (oldDir.exists == false) {
@@ -41,8 +53,8 @@ public class AIrUpdatesIssueFixer {
                 var newDirBack:File = new File(newDir.nativePath + "_backup");
                 if (newDir.exists)
                     newDir.moveTo(newDirBack, true);
-                oldDir.moveTo(newDir, true);
-
+                oldDir.copyTo(newDir, true);
+                oldDir.moveTo(oldDir.parent.resolvePath("backup"), true);
                 Alert.show(migrationRestartRequired, "Information", 4, null, onClose);
                 function onClose(e:*):void {
                     reboot();
