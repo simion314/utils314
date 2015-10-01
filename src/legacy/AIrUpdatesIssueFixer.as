@@ -4,6 +4,8 @@
 package legacy {
 import adobe.utils.ProductManager;
 
+import com.pageone.log.Logger;
+
 import flash.filesystem.File;
 import flash.system.Capabilities;
 
@@ -26,18 +28,22 @@ public class AIrUpdatesIssueFixer {
         return oldFile;
     }
     public static function performAppStorageFolderPathChangeFix(continueInit:Function, migrationRestartRequired:String, performMigrationQuestionMessage:String = null):Boolean {
+        try{
         if (Capabilities.os.indexOf("Mac") < 0) {
             return false;
         }
         var newDir:File = File.applicationStorageDirectory;
-        if(newDir.parent.nativePath.indexOf("/Application Support")<0)
+        if(newDir.nativePath.indexOf("/Application Support")<0)
             return false;
         var oldPath:String = newDir.nativePath.replace("Application Support", "Preferences");
         var oldDir:File = new File(oldPath);
-        if (oldDir.exists == false) {
+        if (oldDir&&oldDir.exists == false) {
             return false;
         }
-
+        }catch(e:Error){
+            Logger.writeError("error in migration checker ",e);
+            return false;
+        }
         Alert.show(performMigrationQuestionMessage, "Migration needed", Alert.YES | Alert.NO, null, alertListener, null, Alert.NO);
         return true;
 

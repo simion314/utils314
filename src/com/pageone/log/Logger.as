@@ -93,6 +93,7 @@ public class Logger {
             stream.writeUTFBytes(s);
             stream.writeUTFBytes(File.lineEnding);
         } catch (e:Error) {
+            trace("in logger writeLine "+e);
         }
     }
 
