@@ -1,10 +1,8 @@
-/**
- * Created by Geronimo on 1/7/16.
- */
 package com.pageone.email {
 import flash.net.URLRequest;
 import flash.net.URLVariables;
 import flash.net.navigateToURL;
+
 
 public class EmailSender {
     public function EmailSender() {
@@ -32,14 +30,14 @@ public class EmailSender {
         var uv:URLVariables = new URLVariables();
         uv['subject'] = email.subject;
         uv["body"] = email.message;
-        var to:String = "";
+        var _to:String = "";
         if (email.to && email.to.length > 0) {
-            to = email.to.join(",");
+            _to = email.to.join(",");
         }
         if (email.bcc && email.bcc.length > 0) {
             uv['bcc'] = email.bcc.join(",");
         }
-        var url:String = "mailto:" + to;
+        var url:String = "mailto:" + _to;
         var urlReq:URLRequest = new URLRequest(url);
         urlReq.data = uv;
         navigateToURL(urlReq);
