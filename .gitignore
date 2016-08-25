@@ -1,11 +1,3 @@
 /bin
-/bin
-/bin
-/bin
-/bin
-/bin
-/bin
-/bin
-/bin
-/bin
-/bin
+*.swc
+.idea
